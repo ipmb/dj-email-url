@@ -1,11 +1,38 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os
+from django.apps import AppConfig
+from django.conf import settings, global_settings, UserSettingsHolder
+
+logger = logging.getLogger(__name__)
 
 try:
     import urlparse
 except ImportError:
     import urllib.parse as urlparse
+
+default_app_config = 'dj_email_url.DjEmailUrlConfig'
+
+class DjEmailUrlConfig(AppConfig):
+    name = 'dj_email_url'
+
+    def _is_default_setting(self, key):
+        return (getattr(settings, key, None) ==
+                getattr(global_settings, key, None))
+
+    def ready(self):
+        """Overwrite EMAIL_* settings based on settings.EMAIL_URL"""
+        email_url = getattr(settings, 'EMAIL_URL', None)
+        if not email_url:
+            return
+        conf = parse(email_url)
+        new_settings = UserSettingsHolder(settings._wrapped)
+        for key, value in conf.items():
+            if not self._is_default_setting(key):
+                logger.warn('dj-email-url is overridding settings.%s', key)
+            setattr(new_settings, key, value)
+        settings._wrapped = new_settings
 
 
 # Register email schemes in URLs.

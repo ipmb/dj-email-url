@@ -47,7 +47,22 @@ Finally, it is **necessary** to assign values to settings:
     EMAIL_BACKEND = email_config['EMAIL_BACKEND']
     EMAIL_USE_TLS = email_config['EMAIL_USE_TLS']
 
-Alternatively, it is possible to use this less explicit shortcut:
+Alternatively, on Django 1.7+, if ``dj_email_url`` is added to the
+``INSTALLED_APPS``, it will convert a setting named ``EMAIL_URL`` setting to
+the expected individual settings at runtime. For example:
+
+.. code:: python
+
+    INSTALLED_APPS += ('dj_email_url',)
+    # Read from environment variable, falling back to default value
+    EMAIL_URL = os.environ.get('EMAIL_URL', 'smtp://...')
+
+*Note: The ``diffsettings`` management command does not report the new values.
+It is unique in that it reads directly from the settings file, negating the
+runtime changes this app performs.*
+
+
+Finally, it is possible to use this less explicit shortcut:
 
 .. code:: python
 

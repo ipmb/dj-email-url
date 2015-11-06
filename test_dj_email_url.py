@@ -2,9 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 import unittest
 
 import dj_email_url
+import django
+
+# Setup Django environment
+sys.path.append(os.path.dirname(__file__))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_test_settings')
+django.setup()
 
 
 class EmailTestSuite(unittest.TestCase):
@@ -48,6 +55,15 @@ class EmailTestSuite(unittest.TestCase):
         url = dj_email_url.parse(url)
         assert url['EMAIL_USE_SSL'] is False
         assert url['EMAIL_USE_TLS'] is True
+
+
+class DjangoSettingsTestSuite(unittest.TestCase):
+
+    def test_settings(self):
+        from django.conf import settings
+        conf = dj_email_url.parse(settings.EMAIL_URL)
+        for key, value in conf.items():
+            self.assertEqual(getattr(settings, key), conf[key])
 
 
 if __name__ == '__main__':
